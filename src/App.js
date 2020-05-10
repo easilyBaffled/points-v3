@@ -1,7 +1,7 @@
 import React from "react";
 import "./App.css";
 import { useDispatch, useSelector } from "react-redux";
-import { actions } from "./state/body";
+import { actions } from "./state/errors";
 import { useEntityDispatch } from "./state/util";
 import { actions as directorActions } from "./state/director";
 const Team = ({ teamCollection, teamName }) =>

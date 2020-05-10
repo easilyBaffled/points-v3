@@ -2,14 +2,9 @@ import { createActions, createReducer, match } from "./util";
 const initialState = {};
 
 export const actors = {
-  add: ({ id, payload }, collection) => ({
-    ...collection,
-    [id]: payload,
-  }),
+  add: ({ id, payload }, collection) => collection.concat({ ...payload, id }),
   remove: ({ id }, collection) =>
-    Object.fromEntries(
-      Object.entries(collection).filter(([entryId]) => entryId !== id)
-    ),
+    collection.filter(([entryId]) => entryId !== id),
 };
 
 /**
@@ -25,8 +20,10 @@ export const collectionOf = (entryReducer, entryActors, initialState = {}) => {
   let debugId = 0;
   const collectionLevelReducer = createReducer(actors, initialState);
   return (collection = initialState, { type, id = debugId++, payload }) => {
-    const collectionLevelAction = type in actors && id in collection;
-    const entryLevelAction = type in entryActors && id in collection;
+    const collectionLevelAction =
+      type in actors && collection.includes((entry) => entry.id === id);
+    const entryLevelAction =
+      type in entryActors && collection.includes((entry) => entry.id === id);
 
     return match({
       true: () => collection,

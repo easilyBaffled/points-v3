@@ -57,9 +57,20 @@ export const createReducer = (actors, initialState) => (
   }
 };
 
+export const withId = (actionObject, id) => ({ ...actionObject, id });
+
 export const useEntityDispatch = (entityId) => {
   const dispatch = useDispatch();
   return (action) => {
-    dispatch({ id: entityId, ...action });
+    dispatch(withId(action, entityId));
   };
+};
+
+export const transform = (func, deriveKey = (v) => v) => (acc, val) => {
+  if (typeof deriveKey !== "function")
+    throw new TypeError(
+      `deriveKey must be a function or \`undefined\`. Did you mean to pass ${deriveKey} to reduce?`
+    );
+  acc[deriveKey(val, acc)] = func(val, acc);
+  return acc;
 };

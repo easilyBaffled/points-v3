@@ -8,7 +8,6 @@
     "@testing-library/user-event": "^7.1.2",
     "console.tap": "^0.5.0",
     "lodash": "^4.17.15",
-    "prettier": "^2.0.4",
     "ramda": "^0.27.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
@@ -45,7 +44,8 @@
     "@applitools/eyes-cypress": "^3.9.21",
     "concurrently": "^5.1.0",
     "cypress": "^4.4.0",
-    "husky": "^4.2.5"
+    "husky": "^4.2.5",
+    "prettier": "^2.0.5"
   },
   "husky": {
     "hooks": {
