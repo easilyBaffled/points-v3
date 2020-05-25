@@ -1,4 +1,5 @@
 import { useDispatch } from "react-redux";
+import produce from "immer";
 
 /**
  * Flatten deep and complex if/ternary operations
@@ -40,20 +41,24 @@ export const createActions = (updaters) =>
  */
 export const createReducer = (actors, initialState) => (
   state = initialState,
-  { type, payload } = {}
+  { type, id, payload } = {}
 ) => {
   try {
-    return type in actors ? actors[type](payload, state) : state;
+    return type in actors
+      ? produce(state, (draftState) => actors[type](payload, draftState, id))
+      : state;
   } catch (e) {
     const data = {
       type,
       action: actors[type],
       payload,
     };
+
+    console.log(typeof actors[type], { payload, state });
     e.message = `${JSON.stringify(data, null, 4)}
-      ${e.message}
-      `;
-    throw new Error(e);
+    ${e.message}`;
+
+    throw e;
   }
 };
 
@@ -74,3 +79,16 @@ export const transform = (func, deriveKey = (v) => v) => (acc, val) => {
   acc[deriveKey(val, acc)] = func(val, acc);
   return acc;
 };
+
+export function isPrimitive(arg) {
+  const type = typeof arg;
+  return type !== "object" && type !== "function";
+}
+
+export const not = (bool) => !bool;
+
+/*
+ * Action: { type: string, payload: any, id?: string }
+ * Actor: ( payload: any, state: T, id: string ) => 'T
+ * Reducer: ( state: object, action: Action ) => 'state
+ */

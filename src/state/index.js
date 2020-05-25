@@ -1,10 +1,13 @@
 import _ from "lodash";
+import produce from "immer";
 import { combineReducers } from "redux";
 import { createActions, createReducer } from "./util";
 import { collectionOf, actors as collectionActors } from "./collection";
-import { updateDerivedValue } from "./director";
+import directorReducer from "./director";
 import { status } from "./tags";
 import errors, { actors as errorActors } from "./errors";
+import tasks, { actors as taskActors } from "./task";
+import bankReducer from "./bank";
 const actors = {
   // clearError: collectionActors.remove,
 };
@@ -15,23 +18,40 @@ export const initialState = {
   tasks: [],
   bank: 0,
   errors: [],
-  filters: [
-    {
-      tags: [status.active, status.pending],
-    },
-  ],
+  filters: {
+    tags: [status.active, status.pending],
+  },
+
   categories: [], // Tags[] - user made tags
 };
 
 const reducers = combineReducers({
   // Existing reducers
-  // tasks: collectionOf(tasks, taskActors, initialState.tasks),
+  tasks: collectionOf(tasks, taskActors, initialState.tasks),
   errors: collectionOf(errors, errorActors, initialState.errors),
-  // filters: collectionOf(filters, filtersActors, initialState.filters),
-  // categories: collectionOf(categories, categoryActors, initialState.filters),
+  filters: () => [
+    {
+      tags: [status.active, status.pending],
+    },
+  ], // collectionOf(filters, filtersActors, initialState.filters),
+  categories: () => [], // collectionOf(categories, categoryActors, initialState.filters),
   // Values that only the director will control, these values are dependant on the above reducer's values
-  bank: (v = {}) => v,
+  bank: bankReducer,
 });
+
+const validators = {
+  spend: (payload, appState) =>
+    payload > appState.bank && errorActors.insufficientPoints(),
+};
+
+const validationReducer = (state, { type, payload } = {}) => {
+  const validation =
+    type in validators ? validators[type](payload, state) : false;
+  if (!validation) return false;
+  return produce(state, (draft) => {
+    draft.errors.push(validation);
+  });
+};
 
 /*
  * Standard reducers are isolated from one another. They cannot share values.
@@ -42,12 +62,13 @@ const reducers = combineReducers({
  * @param {{payload: *, type: string}} action
  * @return {Object}
  */
-const app = (state = initialState, action = {}) =>
-  _.flow(
-    // validationReducer(action),
-    (s) => reducers(s, action),
-    //(s) => createReducer(actions, initialState)(s, action),
-    updateDerivedValue(action)
-  )(state);
+const app = (state = initialState, action = {}) => {
+  const validationRes = validationReducer(state, action);
+  if (validationRes) {
+    // validationRes will be false if there were no errors
+    return validationRes;
+  }
 
+  return directorReducer(reducers(state, action), action);
+};
 export default app;
