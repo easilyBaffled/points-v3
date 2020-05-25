@@ -1,11 +1,15 @@
 import { curryRight2 } from "../util";
 import _ from "lodash";
-export const createTag = (name, isCustom) => ({
-  id: name,
-  name,
-  isCustom,
-});
-
+export const createTag = (name, isCustom) => {
+  const tag = {
+    id: name,
+    name,
+  };
+  if (isCustom) {
+    tag.isCustom = true;
+  }
+  return tag;
+};
 const tags = {
   recurring: { id: "recurring", name: "recurring", done: [] },
   streak: (length) => ({

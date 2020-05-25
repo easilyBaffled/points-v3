@@ -3,6 +3,7 @@ import app, { actions as appActions, initialState } from "../../state";
 import { actions as taskActions, actors as taskActors } from "../../state/task";
 import { actions as bankActions } from "../../state/bank";
 import { actors as errorActors } from "../../state/errors";
+import { actions as filterActions } from "../../state/filter";
 import { actions as collectionActions } from "../../state/collection";
 import { actions as directorActions } from "../../state/director";
 
@@ -20,21 +21,21 @@ const baseTask = {
     id: 1,
     name: 1,
     value: 1,
-    createAt: debugDate(),
+    createdAt: debugDate(),
     tags: [status.active],
   },
   pending: {
     id: 1,
     name: 1,
     value: 1,
-    createAt: debugDate(),
+    createdAt: debugDate(),
     tags: [status.pending],
   },
   done: {
     id: 1,
     name: 1,
     value: 1,
-    createAt: debugDate(),
+    createdAt: debugDate(),
     tags: [status.done],
   },
   with: (...tags) => ({ ...baseTask.active, tags }),
@@ -56,8 +57,8 @@ describe("How the World Works", () => {
       const actual = {
         tasks: [baseTask.active],
       };
-
-      expect(expected).toMatchObject(expect.objectContaining(actual));
+      expect(expected.tasks).toEqual(actual.tasks);
+      // expect(expected).toMatchObject(expect.objectContaining(actual));
     });
     test("Mark a task complete", () => {
       const prevState = {
@@ -252,7 +253,6 @@ describe("How the World Works", () => {
             }),
             taskActors.create({ id: 2, name: "subject" }),
           ],
-          bank: 0,
         };
         const expected = app(prevState, directorActions.resolveDay());
         const actual = {
@@ -261,6 +261,7 @@ describe("How the World Works", () => {
               id: 1,
               name: "patient zero",
               createdAt: oldDate,
+              value: 2,
               tags: [{ id: "infectious", name: "infectious", infected: [2] }],
             }),
             taskActors.create({
@@ -277,10 +278,10 @@ describe("How the World Works", () => {
               ],
             }),
           ],
-          bank: 0,
         };
 
-        expect(expected).toMatchObject(expect.objectContaining(actual));
+        expect(expected.tasks).toEqual(actual.tasks);
+        // expect(expected).toMatchObject(expect.objectContaining(actual));
       });
       test("Resolve completed infected task", () => {
         let oldDate = debugDate();
@@ -485,13 +486,11 @@ describe("How the World Works", () => {
     });
     describe("View Filtering", () => {
       test("Filter on Category Tag", () => {
-        const expected = app(initialState, appAction.addFilter("tag1"));
+        const expected = app(initialState, filterActions.addFilterTag("tag1"));
         const actual = {
-          filters: [
-            {
-              tags: [status.active, status.pending, { id: "tag1" }],
-            },
-          ],
+          filters: {
+            tags: [status.active.id, status.pending.id, "tag1"],
+          },
         };
 
         expect(expected).toMatchObject(expect.objectContaining(actual));
@@ -499,26 +498,25 @@ describe("How the World Works", () => {
       test("Filter on Status.pending", () => {
         const expected = app(
           initialState,
-          appAction.setFilters(status.pending)
+          filterActions.setFilterTag(status.pending.id)
         );
         const actual = {
-          filters: [
-            {
-              tags: [status.pending],
-            },
-          ],
+          filters: {
+            tags: [status.pending.id],
+          },
         };
 
         expect(expected).toMatchObject(expect.objectContaining(actual));
       });
       test("Filter on Status.done", () => {
-        const expected = app(initialState, appAction.setFilters(status.done));
+        const expected = app(
+          initialState,
+          filterActions.setFilterTag(status.done.id)
+        );
         const actual = {
-          filters: [
-            {
-              tags: [status.done],
-            },
-          ],
+          filters: {
+            tags: [status.done.id],
+          },
         };
 
         expect(expected).toMatchObject(expect.objectContaining(actual));
@@ -526,16 +524,14 @@ describe("How the World Works", () => {
       test("Clear specific Filter", () => {
         const appState = {
           ...initialState,
-          filters: [
-            {
-              tags: [status.active, status.pending, { id: "tag1" }],
-            },
-          ],
+          filters: {
+            tags: [status.active.id, status.pending.id, "tag1"],
+          },
         };
 
         const expected = app(
           initialState,
-          appAction.clearFilter({ id: "tag1" })
+          filterActions.removeFilterTag("tag1")
         );
         const actual = initialState;
 
@@ -544,18 +540,11 @@ describe("How the World Works", () => {
       test("Clear All Filters", () => {
         const appState = {
           ...initialState,
-          filters: [
-            {
-              tags: [
-                status.active,
-                status.pending,
-                { id: "tag1" },
-                { id: "tag2" },
-              ],
-            },
-          ],
+          filters: {
+            tags: [status.active.id, status.pending.id, "tag1", 3],
+          },
         };
-        const expected = app(appState, appAction.resetFilters());
+        const expected = app(appState, filterActions.resetFilterTag());
         const actual = initialState;
 
         expect(expected).toMatchObject(expect.objectContaining(actual));

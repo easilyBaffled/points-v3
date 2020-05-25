@@ -7,6 +7,7 @@ import directorReducer from "./director";
 import { status } from "./tags";
 import errors, { actors as errorActors } from "./errors";
 import tasks, { actors as taskActors } from "./task";
+import filters, { initialState as initialFilterState } from "./filter";
 import bankReducer from "./bank";
 const actors = {
   // clearError: collectionActors.remove,
@@ -18,9 +19,7 @@ export const initialState = {
   tasks: [],
   bank: 0,
   errors: [],
-  filters: {
-    tags: [status.active, status.pending],
-  },
+  filters: initialFilterState,
 
   categories: [], // Tags[] - user made tags
 };
@@ -29,11 +28,7 @@ const reducers = combineReducers({
   // Existing reducers
   tasks: collectionOf(tasks, taskActors, initialState.tasks),
   errors: collectionOf(errors, errorActors, initialState.errors),
-  filters: () => [
-    {
-      tags: [status.active, status.pending],
-    },
-  ], // collectionOf(filters, filtersActors, initialState.filters),
+  filters,
   categories: () => [], // collectionOf(categories, categoryActors, initialState.filters),
   // Values that only the director will control, these values are dependant on the above reducer's values
   bank: bankReducer,
