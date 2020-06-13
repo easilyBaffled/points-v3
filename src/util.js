@@ -14,3 +14,14 @@ export const isDaysAgo = (date, range) => {
   currentDate.setDate(currentDate.getDate() - range);
   return date.getDate() < currentDate.getDate();
 };
+
+const debugLevelOff = 0;
+let debugLevel = debugLevelOff;
+
+export const setDebugLevel = (newDebugLevel) => {
+  debugLevel = newDebugLevel;
+};
+
+export const resetDebugLevel = () => {
+  debugLevel = debugLevelOff;
+};
