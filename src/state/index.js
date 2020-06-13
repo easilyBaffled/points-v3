@@ -20,7 +20,6 @@ export const initialState = {
   bank: 0,
   errors: [],
   filters: initialFilterState,
-
   categories: [], // Tags[] - user made tags
 };
 
@@ -58,6 +57,7 @@ const validationReducer = (state, { type, payload } = {}) => {
  * @return {Object}
  */
 const app = (state = initialState, action = {}) => {
+  console.log(JSON.stringify({ state, action }, null, 4));
   const validationRes = validationReducer(state, action);
   if (validationRes) {
     // validationRes will be false if there were no errors

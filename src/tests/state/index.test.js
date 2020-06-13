@@ -1,5 +1,5 @@
-import tags, { hasPending, hasStreak, status } from "../../state/tags";
-import app, { actions as appActions, initialState } from "../../state";
+import tags, { status } from "../../state/tags";
+import app, { initialState } from "../../state";
 import { actions as taskActions, actors as taskActors } from "../../state/task";
 import { actions as bankActions } from "../../state/bank";
 import { actors as errorActors } from "../../state/errors";
@@ -57,8 +57,8 @@ describe("How the World Works", () => {
       const actual = {
         tasks: [baseTask.active],
       };
-      expect(expected.tasks).toEqual(actual.tasks);
-      // expect(expected).toMatchObject(expect.objectContaining(actual));
+      // expect(expected.tasks).toEqual(actual.tasks);
+      expect(expected).toMatchObject(expect.objectContaining(actual));
     });
     test("Mark a task complete", () => {
       const prevState = {
